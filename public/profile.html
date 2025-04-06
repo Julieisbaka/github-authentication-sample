@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - GitHub Authentication Sample</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="site-title">GitHub Auth Sample</a>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/profile.html" class="nav-link active">Profile</a></li>
+          <li><a href="/leaderboard.html" class="nav-link">Leaderboard</a></li>
+          <li><a href="/settings.html" class="nav-link">Settings</a></li>
+          <li><a href="/docs.html" class="nav-link">Documentation</a></li>
+        </ul>
+      </nav>
+      <div id="auth-container">
+        <div class="auth-state hidden" id="authenticated-container">
+          <img id="avatar" src="" alt="Profile Picture">
+          <span id="username"></span>
+          <a href="/logout" class="button button-secondary">Logout</a>
+        </div>
+        <div class="auth-state" id="unauthenticated-container">
+          <a href="/login" class="button" id="login-button">Login with GitHub</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="profile-section">
+      <h2>Profile Management</h2>
+      <div id="profile-container" class="hidden">
+        <div class="profile-header">
+          <div class="profile-avatar-container">
+            <img id="profile-avatar" src="" alt="Profile Picture">
+            <button id="update-avatar-btn" class="button-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="profile-info">
+            <h3 id="profile-name"></h3>
+            <p id="profile-bio"></p>
+            <div class="profile-meta">
+              <span id="profile-location"></span>
+              <span id="profile-company"></span>
+              <a id="profile-blog" target="_blank"></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-tabs">
+          <button class="tab-button active" data-tab="repositories">Repositories</button>
+          <button class="tab-button" data-tab="activity">Activity</button>
+          <button class="tab-button" data-tab="stats">Stats</button>
+        </div>
+
+        <div class="profile-tab-content" id="repositories-tab">
+          <div class="repositories-header">
+            <h3>Your Repositories</h3>
+            <div class="repositories-filter">
+              <select id="repo-type-filter">
+                <option value="all">All</option>
+                <option value="owner">Owner</option>
+                <option value="member">Member</option>
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+              </select>
+              <select id="repo-sort">
+                <option value="updated">Last Updated</option>
+                <option value="created">Created</option>
+                <option value="pushed">Last Pushed</option>
+                <option value="full_name">Name</option>
+              </select>
+            </div>
+          </div>
+          <div id="repositories-container" class="repositories-grid"></div>
+          <div class="pagination">
+            <button id="prev-page" class="button button-secondary">Previous</button>
+            <span id="page-indicator">Page 1</span>
+            <button id="next-page" class="button button-secondary">Next</button>
+          </div>
+        </div>
+
+        <div class="profile-tab-content hidden" id="activity-tab">
+          <h3>Recent Activity</h3>
+          <div class="activity-timeline" id="activity-container">
+            <div class="activity-placeholder">
+              <p>Loading activity data...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-tab-content hidden" id="stats-tab">
+          <h3>GitHub Statistics</h3>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h4>Contributions</h4>
+              <div class="stat-value" id="contrib-count">-</div>
+              <div class="stat-description">Total contributions in the last year</div>
+            </div>
+            <div class="stat-card">
+              <h4>Repositories</h4>
+              <div class="stat-value" id="repo-count">-</div>
+              <div class="stat-description">Public and private repositories</div>
+            </div>
+            <div class="stat-card">
+              <h4>Stars</h4>
+              <div class="stat-value" id="stars-count">-</div>
+              <div class="stat-description">Stars received across all repositories</div>
+            </div>
+            <div class="stat-card">
+              <h4>Languages</h4>
+              <div class="stat-value" id="lang-count">-</div>
+              <div class="stat-description">Programming languages used</div>
+            </div>
+          </div>
+          <div class="languages-chart">
+            <h4>Top Languages</h4>
+            <div id="lang-chart"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="profile-unauthenticated" class="auth-required-message">
+        <p>You need to be logged in to view your profile.</p>
+        <a href="/login" class="button">Login with GitHub</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2023 GitHub Authentication Sample. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard - GitHub Authentication Sample</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="site-title">GitHub Auth Sample</a>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/profile.html" class="nav-link">Profile</a></li>
+          <li><a href="/leaderboard.html" class="nav-link active">Leaderboard</a></li>
+          <li><a href="/settings.html" class="nav-link">Settings</a></li>
+          <li><a href="/docs.html" class="nav-link">Documentation</a></li>
+        </ul>
+      </nav>
+      <div id="auth-container">
+        <div class="auth-state hidden" id="authenticated-container">
+          <img id="avatar" src="" alt="Profile Picture">
+          <span id="username"></span>
+          <a href="/logout" class="button button-secondary">Logout</a>
+        </div>
+        <div class="auth-state" id="unauthenticated-container">
+          <a href="/login" class="button" id="login-button">Login with GitHub</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="leaderboard-section">
+      <h2>Tool Leaderboard</h2>
+      <p class="section-description">Top GitHub users ranked by contributions, stars, and repository popularity.</p>
+      
+      <div class="leaderboard-tabs">
+        <button class="tab-button active" data-tab="contributors">Top Contributors</button>
+        <button class="tab-button" data-tab="repositories">Top Repositories</button>
+        <button class="tab-button" data-tab="languages">Popular Languages</button>
+      </div>
+      
+      <div class="leaderboard-tab-content" id="contributors-tab">
+        <div class="leaderboard-filters">
+          <select id="contributor-period-filter">
+            <option value="daily">Today</option>
+            <option value="weekly" selected>This Week</option>
+            <option value="monthly">This Month</option>
+            <option value="yearly">This Year</option>
+          </select>
+          <select id="contributor-type-filter">
+            <option value="all">All Contributors</option>
+            <option value="organization">Organizations</option>
+            <option value="users">Individual Users</option>
+          </select>
+        </div>
+        
+        <div class="leaderboard-list" id="contributors-list">
+          <!-- Contributors will be loaded here -->
+          <div class="leaderboard-loading">
+            <div class="spinner"></div>
+            <p>Loading contributors...</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="leaderboard-tab-content hidden" id="repositories-tab">
+        <div class="leaderboard-filters">
+          <select id="repo-period-filter">
+            <option value="daily">Today</option>
+            <option value="weekly" selected>This Week</option>
+            <option value="monthly">This Month</option>
+            <option value="yearly">This Year</option>
+          </select>
+          <select id="repo-language-filter">
+            <option value="all">All Languages</option>
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="go">Go</option>
+            <option value="rust">Rust</option>
+            <option value="typescript">TypeScript</option>
+          </select>
+        </div>
+        
+        <div class="leaderboard-grid" id="repositories-list">
+          <!-- Repositories will be loaded here -->
+          <div class="leaderboard-loading">
+            <div class="spinner"></div>
+            <p>Loading repositories...</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="leaderboard-tab-content hidden" id="languages-tab">
+        <div class="languages-chart-container">
+          <canvas id="languages-chart"></canvas>
+        </div>
+        
+        <div class="languages-table">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Language</th>
+                <th>Repositories</th>
+                <th>Stars</th>
+                <th>Trending</th>
+              </tr>
+            </thead>
+            <tbody id="languages-list">
+              <!-- Languages will be loaded here -->
+              <tr class="leaderboard-loading-row">
+                <td colspan="5">
+                  <div class="leaderboard-loading">
+                    <div class="spinner"></div>
+                    <p>Loading languages...</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+    <section id="your-rank-section" class="hidden">
+      <h2>Your Ranking</h2>
+      <div class="user-rank-card">
+        <div class="user-rank-header">
+          <img id="user-rank-avatar" src="" alt="Your Profile Picture">
+          <div class="user-rank-info">
+            <h3 id="user-rank-name"></h3>
+            <p>Your GitHub stats and rankings compared to other users</p>
+          </div>
+          <div class="user-rank-position">
+            <div class="rank-number" id="user-rank-position">#0</div>
+            <div class="rank-label">Overall Rank</div>
+          </div>
+        </div>
+        
+        <div class="user-rank-stats">
+          <div class="user-stat-item">
+            <div class="stat-label">Contributions</div>
+            <div class="stat-value" id="user-contrib">0</div>
+          </div>
+          <div class="user-stat-item">
+            <div class="stat-label">Repositories</div>
+            <div class="stat-value" id="user-repos">0</div>
+          </div>
+          <div class="user-stat-item">
+            <div class="stat-label">Stars</div>
+            <div class="stat-value" id="user-stars">0</div>
+          </div>
+          <div class="user-stat-item">
+            <div class="stat-label">Followers</div>
+            <div class="stat-value" id="user-followers">0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2023 GitHub Authentication Sample. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/leaderboard.js"></script>
+</body>
+</html>
