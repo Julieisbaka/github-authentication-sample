@@ -25,8 +25,8 @@ jobs:
       - name: Exchange code for token
         id: token_exchange
         env:
-          CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           CODE: ${{ github.event.client_payload.code }}
         run: |
           RESPONSE=$(curl -s -X POST \
