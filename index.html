@@ -5,60 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Project Submissions</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%232EA44F' d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z'%3E%3C/path%3E%3C/svg%3E" type="image/svg+xml">
 </head>
 <body>
-    <header>
-        <h1>GitHub Project Submissions</h1>
-        <div id="auth-container">
-            <div id="logged-out" class="auth-state">
-                <button id="login-button">Sign in with GitHub</button>
+    <div class="container">
+        <header>
+            <h1 class="site-title">GitHub Project Submissions</h1>
+            <div id="auth-container">
+                <div id="logged-out" class="auth-state">
+                    <button id="login-button" class="button">Sign in with GitHub</button>
+                </div>
+                <div id="logged-in" class="auth-state hidden">
+                    <img id="avatar" alt="Profile avatar" />
+                    <span id="username"></span>
+                    <button id="logout-button" class="button button-secondary">Sign Out</button>
+                </div>
             </div>
-            <div id="logged-in" class="auth-state hidden">
-                <img id="avatar" alt="Profile avatar" />
-                <span id="username"></span>
-                <button id="logout-button">Sign Out</button>
-            </div>
-        </div>
-    </header>
+        </header>
 
-    <main>
-        <section id="welcome-section">
-            <h2>Welcome to the Project Submission Portal</h2>
-            <p>Sign in with GitHub to submit your projects and see past submissions.</p>
-        </section>
+        <main>
+            <section id="welcome-section">
+                <h2>Welcome to the Project Submission Portal</h2>
+                <p>Sign in with GitHub to submit your projects and see past submissions.</p>
+                <div class="features">
+                    <div class="feature">
+                        <h3>Easy Authentication</h3>
+                        <p>Use your existing GitHub account to sign in - no new passwords to remember.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Showcase Your Work</h3>
+                        <p>Share your projects with the community and get feedback from others.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Discover Projects</h3>
+                        <p>Browse submissions from other developers for inspiration.</p>
+                    </div>
+                </div>
+            </section>
 
-        <section id="submission-form" class="hidden">
-            <h2>Submit a New Project</h2>
-            <form id="project-form">
-                <div class="form-group">
-                    <label for="project-name">Project Name</label>
-                    <input type="text" id="project-name" name="project-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="project-url">Repository URL</label>
-                    <input type="url" id="project-url" name="project-url" required>
-                </div>
-                <div class="form-group">
-                    <label for="project-description">Description</label>
-                    <textarea id="project-description" name="project-description" rows="4" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="project-tags">Tags (comma-separated)</label>
-                    <input type="text" id="project-tags" name="project-tags">
-                </div>
-                <button type="submit">Submit Project</button>
-            </form>
-        </section>
+            <section id="submission-form" class="hidden">
+                <h2>Submit a New Project</h2>
+                <form id="project-form">
+                    <div class="form-group">
+                        <label for="project-name">Project Name</label>
+                        <input type="text" id="project-name" name="project-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="project-url">Repository URL</label>
+                        <input type="url" id="project-url" name="project-url" placeholder="https://github.com/username/repository" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="project-description">Description</label>
+                        <textarea id="project-description" name="project-description" rows="4" placeholder="Tell us about your project..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="project-tags">Tags (comma-separated)</label>
+                        <input type="text" id="project-tags" name="project-tags" placeholder="javascript, web, api">
+                    </div>
+                    <button type="submit">Submit Project</button>
+                </form>
+            </section>
 
-        <section id="projects-list" class="hidden">
-            <h2>Your Submitted Projects</h2>
-            <div id="projects-container"></div>
-        </section>
-    </main>
+            <section id="projects-list" class="hidden">
+                <h2>Your Submitted Projects</h2>
+                <div id="projects-container"></div>
+            </section>
+        </main>
 
-    <footer>
-        <p>Powered by GitHub Pages & GitHub Actions</p>
-    </footer>
+        <footer>
+            <p>Powered by GitHub Pages & GitHub Actions</p>
+            <p><small>No servers required - everything runs on GitHub infrastructure</small></p>
+        </footer>
+    </div>
 
     <script src="auth.js"></script>
     <script src="app.js"></script>
