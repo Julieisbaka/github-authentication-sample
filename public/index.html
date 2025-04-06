@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webish</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="site-title">Webish</a>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="/" class="nav-link active">Home</a></li>
+          <li><a href="/settings.html" class="nav-link">Settings</a></li>
+          <li><a href="/docs.html" class="nav-link">Documentation</a></li>
+        </ul>
+      </nav>
+      <div id="auth-container">
+        <div class="auth-state hidden" id="authenticated-container">
+          <img id="avatar" src="" alt="Profile Picture">
+          <span id="username"></span>
+          <a href="/logout" class="button button-secondary">Logout</a>
+        </div>
+        <div class="auth-state" id="unauthenticated-container">
+          <a href="/login" class="button" id="login-button">Login with GitHub</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1>Welcome to Webish</h1>
+      <p>This is Webish.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Webish. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

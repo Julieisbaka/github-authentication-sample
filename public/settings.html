@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Webish</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="site-title">Webish</a>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/settings.html" class="nav-link active">Settings</a></li>
+          <li><a href="/docs.html" class="nav-link">Documentation</a></li>
+        </ul>
+      </nav>
+      <div id="auth-container">
+        <div class="auth-state hidden" id="authenticated-container">
+          <img id="avatar" src="" alt="Profile Picture">
+          <span id="username"></span>
+          <a href="/logout" class="button button-secondary">Logout</a>
+        </div>
+        <div class="auth-state" id="unauthenticated-container">
+          <a href="/login" class="button" id="login-button">Login with GitHub</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="settings-section">
+      <h2>Account Settings</h2>
+      <div id="settings-container" class="hidden">
+        <form id="settings-form">
+          <div class="form-group">
+            <label for="display-name">Display Name</label>
+            <input type="text" id="display-name" name="displayName" placeholder="Your display name">
+          </div>
+          
+          <div class="form-group">
+            <label for="email-notifications">Email Notifications</label>
+            <div class="toggle-container">
+              <input type="checkbox" id="email-notifications" name="emailNotifications" class="toggle-input">
+              <label for="email-notifications" class="toggle-label"></label>
+              <span class="toggle-text">Receive email notifications</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>GitHub Scopes</label>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input type="checkbox" id="scope-repo" name="scopes" value="repo" checked disabled>
+                <label for="scope-repo">Repository Access (required)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="scope-user" name="scopes" value="user" checked disabled>
+                <label for="scope-user">User Profile (required)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="scope-gist" name="scopes" value="gist">
+                <label for="scope-gist">Gist Access</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="theme">UI Theme</label>
+            <select id="theme" name="theme">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="system">System Default</option>
+            </select>
+          </div>
+          
+          <button type="submit" class="button">Save Settings</button>
+        </form>
+        
+        <div class="divider"></div>
+        
+        <div class="danger-zone">
+          <h3>Danger Zone</h3>
+          <p>Disconnect your GitHub account from this application.</p>
+          <button id="disconnect-btn" class="button button-danger">Disconnect Account</button>
+        </div>
+      </div>
+      
+      <div id="settings-unauthenticated" class="auth-required-message">
+        <p>You need to be logged in to access settings.</p>
+        <a href="/login" class="button">Login with GitHub</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Webish. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>
