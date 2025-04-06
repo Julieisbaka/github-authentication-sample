@@ -1,5 +1,5 @@
 // GitHub OAuth Settings
-const CLIENT_ID = 'YOUR_GITHUB_CLIENT_ID'; // Replace with your GitHub OAuth App client ID
+const CLIENT_ID = 'Ov23liYJv9yGDtXz1DDK'; // Replace with your GitHub OAuth App client ID
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 
 // Storage keys
