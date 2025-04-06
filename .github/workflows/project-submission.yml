@@ -1,0 +1,100 @@
+name: Project Submission Workflow
+
+on:
+  # Handle OAuth callback
+  repository_dispatch:
+    types: [oauth-callback]
+  
+  # Handle project submissions
+  issues:
+    types: [opened]
+  
+  # Run API backend
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'handle_oauth'
+
+jobs:
+  handle_oauth:
+    if: github.event_name == 'repository_dispatch' && github.event.action == 'oauth-callback'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exchange code for token
+        id: token_exchange
+        env:
+          CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+          CODE: ${{ github.event.client_payload.code }}
+        run: |
+          RESPONSE=$(curl -s -X POST \
+            -H "Accept: application/json" \
+            -d "client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&code=${CODE}" \
+            https://github.com/login/oauth/access_token)
+          
+          # Extract token from response
+          TOKEN=$(echo $RESPONSE | jq -r '.access_token')
+          
+          echo "::set-output name=token::${TOKEN}"
+      
+      - name: Return token to client
+        # In a real app, this would securely return the token to the client
+        # For a static site, you could:
+        # 1. Store token in GitHub Actions secrets temporarily 
+        # 2. Have the client check a commit status or some other "signal"
+        # 3. Use client-side JS to fetch the token from a temporary endpoint
+        run: echo "Token would be securely returned to the client"
+
+  process_submission:
+    if: github.event_name == 'issues' && contains(github.event.issue.title, '[Project Submission]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Extract project data
+        id: extract_data
+        run: |
+          # Parse JSON from issue body
+          BODY="${{ github.event.issue.body }}"
+          echo "$BODY" > project_data.json
+          
+          # Validate the JSON
+          cat project_data.json | jq
+      
+      - name: Update projects file
+        run: |
+          # Get and update projects.json
+          if [ -f "data/projects.json" ]; then
+            # Add the new project to existing data
+            jq -s '.[0] + [.[1]]' data/projects.json project_data.json > temp.json
+            mv temp.json data/projects.json
+          else
+            # Create data directory if it doesn't exist
+            mkdir -p data
+            # Create new projects.json with this submission as the first entry
+            echo '[' > data/projects.json
+            cat project_data.json >> data/projects.json
+            echo ']' >> data/projects.json
+          fi
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: 'Add new project submission'
+          title: 'New Project Submission'
+          body: |
+            This PR adds a new project submission from issue #${{ github.event.issue.number }}
+            
+            Project Name: $(cat project_data.json | jq -r '.name')
+            Submitted by: $(cat project_data.json | jq -r '.user')
+          branch: project-submission-${{ github.event.issue.number }}
+      
+      - name: Close Issue
+        uses: peter-evans/close-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          comment: |
+            Thank you for your submission! A pull request has been created to add your project.
+            It will be reviewed and merged soon.
