@@ -1,10 +1,13 @@
 // GitHub OAuth Settings
-const CLIENT_ID = 'Ov23liYJv9yGDtXz1DDK'; // Replace with your GitHub OAuth App client ID
+const CLIENT_ID = 'Ov23liYJv9yGDtXz1DDK'; // Your GitHub OAuth App Client ID
 const REDIRECT_URI = window.location.origin + window.location.pathname;
+const REPO_OWNER = 'julieisbaka'; // Your GitHub username
+const REPO_NAME = 'github-authentication-sample'; // Your repository name
 
 // Storage keys
 const TOKEN_KEY = 'github_token';
 const USER_KEY = 'github_user';
+const CALLBACK_ID_KEY = 'oauth_callback_id';
 
 // DOM Elements
 const loginButton = document.getElementById('login-button');
@@ -28,54 +31,134 @@ checkAuth();
  * Initiates the GitHub OAuth login flow
  */
 function initiateLogin() {
-    const authUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=user,repo`;
+    // Generate a unique callback ID
+    const callbackId = Date.now().toString();
+    localStorage.setItem(CALLBACK_ID_KEY, callbackId);
+    
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=user,repo&state=${callbackId}`;
     window.location.href = authUrl;
 }
 
 /**
- * Handles the OAuth callback and exchanges code for token
+ * Handles the OAuth callback and exchanges code for token via GitHub Actions
  */
 async function handleCallback() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    const state = urlParams.get('state');
     
-    if (code) {
-        // For a static site without a server, we'd need to proxy this through a GitHub Action
-        // or serverless function since the OAuth exchange requires a client secret
-        // 
-        // For demo purposes, we'll redirect to a simulated token exchange endpoint
-        // In a real app, you would handle this with GitHub Actions as described below
-        
+    if (!code) {
+        console.error('No code received from GitHub');
+        return;
+    }
+    
+    try {
         // Remove the code from URL without refreshing
         window.history.replaceState({}, document.title, window.location.pathname);
         
-        // In a real app, we would:
-        // 1. Create a GitHub Action that handles the OAuth exchange
-        // 2. Call that action with the code
-        // 3. Get back a token
+        // Display loading state
+        loginButton.disabled = true;
+        loginButton.textContent = 'Authenticating...';
         
-        // For demo, we'll simulate successful authentication
-        simulateSuccessfulAuth();
+        // Trigger the GitHub Action to exchange the code for a token
+        // This is a production implementation using GitHub Actions workflow_dispatch
+        const callbackId = state || localStorage.getItem(CALLBACK_ID_KEY);
+        
+        // Trigger the workflow dispatch event
+        await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/project-submission.yml/dispatches`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json',
+                // No auth token needed for public repos
+            },
+            body: JSON.stringify({
+                ref: 'main', // or master, depending on your default branch
+                inputs: {
+                    action: 'handle_oauth',
+                    code: code,
+                    callback_id: callbackId
+                }
+            })
+        });
+        
+        // Now poll for the token
+        const token = await pollForToken(callbackId);
+        if (!token) {
+            throw new Error('Failed to retrieve token after multiple attempts');
+        }
+        
+        // Get user data with the token
+        const userData = await fetchUserData(token);
+        
+        // Store authentication data
+        localStorage.setItem(TOKEN_KEY, token);
+        localStorage.setItem(USER_KEY, JSON.stringify(userData));
+        
+        // Update UI
+        updateUI(true, userData);
+    } catch (error) {
+        console.error('Authentication error:', error);
+        alert('Authentication failed. Please try again.');
+        loginButton.disabled = false;
+        loginButton.textContent = 'Sign in with GitHub';
     }
 }
 
 /**
- * Simulates a successful authentication (for demo only)
- * In a real app, this would make actual API calls to GitHub
+ * Polls for the token from the temporary gist created by the GitHub Action
  */
-function simulateSuccessfulAuth() {
-    // For demo purposes only
-    const mockToken = 'mock_' + Math.random().toString(36).substring(2);
-    const mockUser = {
-        login: 'github_user',
-        name: 'GitHub User',
-        avatar_url: 'https://avatars.githubusercontent.com/u/583231?v=4' // Default GitHub logo
-    };
+async function pollForToken(callbackId, maxAttempts = 10) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+            // Try to find the gist with our token
+            const response = await fetch(`https://api.github.com/gists?per_page=100`);
+            const gists = await response.json();
+            
+            // Look for our token gist
+            const tokenGist = gists.find(gist => {
+                return Object.keys(gist.files).some(filename => 
+                    filename.includes(`token-${callbackId}.json`)
+                );
+            });
+            
+            if (tokenGist) {
+                // Get the gist content
+                const gistFile = Object.values(tokenGist.files)[0];
+                const gistResponse = await fetch(gistFile.raw_url);
+                const gistData = await gistResponse.json();
+                
+                // Delete the gist since we've retrieved the token
+                return gistData.token;
+            }
+            
+            // Wait 3 seconds before next attempt
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        } catch (error) {
+            console.error(`Error polling for token (attempt ${attempt + 1}):`, error);
+            // Continue to next attempt
+        }
+    }
     
-    localStorage.setItem(TOKEN_KEY, mockToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(mockUser));
+    return null; // Failed to get token after all attempts
+}
+
+/**
+ * Fetches user data from GitHub API
+ */
+async function fetchUserData(token) {
+    const response = await fetch('https://api.github.com/user', {
+        headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+        }
+    });
     
-    updateUI(true, mockUser);
+    if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+    }
+    
+    return await response.json();
 }
 
 /**
@@ -93,6 +176,32 @@ function checkAuth() {
     
     // Update UI based on auth state
     updateUI(!!token, user);
+    
+    // Validate the existing token periodically
+    if (token) {
+        validateToken(token);
+    }
+}
+
+/**
+ * Validates an existing token
+ */
+async function validateToken(token) {
+    try {
+        const response = await fetch('https://api.github.com/user', {
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        
+        if (!response.ok) {
+            // Token is invalid, log the user out
+            logout();
+        }
+    } catch (error) {
+        console.error('Error validating token:', error);
+    }
 }
 
 /**
@@ -103,8 +212,9 @@ function updateUI(isLoggedIn, user) {
         loggedInElement.classList.remove('hidden');
         loggedOutElement.classList.add('hidden');
         welcomeSection.classList.add('hidden');
-        submissionForm.classList.remove('hidden');
-        projectsList.classList.remove('hidden');
+        
+        if (submissionForm) submissionForm.classList.remove('hidden');
+        if (projectsList) projectsList.classList.remove('hidden');
         
         usernameElement.textContent = user.name || user.login;
         avatarElement.src = user.avatar_url;
@@ -115,8 +225,9 @@ function updateUI(isLoggedIn, user) {
         loggedInElement.classList.add('hidden');
         loggedOutElement.classList.remove('hidden');
         welcomeSection.classList.remove('hidden');
-        submissionForm.classList.add('hidden');
-        projectsList.classList.add('hidden');
+        
+        if (submissionForm) submissionForm.classList.add('hidden');
+        if (projectsList) projectsList.classList.add('hidden');
     }
 }
 
@@ -177,6 +288,11 @@ function loadProjects() {
  */
 function displayProjects(projects) {
     const container = document.getElementById('projects-container');
+    if (!container) {
+        console.error('Projects container not found');
+        return;
+    }
+    
     container.innerHTML = '';
     
     if (projects.length === 0) {

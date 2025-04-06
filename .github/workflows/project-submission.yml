@@ -9,25 +9,31 @@ on:
   issues:
     types: [opened]
   
-  # Run API backend
+  # This is for direct API access from client
   workflow_dispatch:
     inputs:
       action:
         description: 'Action to perform'
         required: true
         default: 'handle_oauth'
+      code:
+        description: 'OAuth code'
+        required: false
+      callback_id:
+        description: 'Callback ID for response'
+        required: false
 
 jobs:
   handle_oauth:
-    if: github.event_name == 'repository_dispatch' && github.event.action == 'oauth-callback'
+    if: github.event_name == 'repository_dispatch' && github.event.action == 'oauth-callback' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'handle_oauth')
     runs-on: ubuntu-latest
     steps:
       - name: Exchange code for token
         id: token_exchange
         env:
-          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_ID: 'Ov23liYJv9yGDtXz1DDK'  # Your actual Client ID
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-          CODE: ${{ github.event.client_payload.code }}
+          CODE: ${{ github.event.client_payload.code || github.event.inputs.code }}
         run: |
           RESPONSE=$(curl -s -X POST \
             -H "Accept: application/json" \
@@ -37,21 +43,57 @@ jobs:
           # Extract token from response
           TOKEN=$(echo $RESPONSE | jq -r '.access_token')
           
-          echo "::set-output name=token::${TOKEN}"
+          # Check if token was obtained successfully
+          if [[ "$TOKEN" == "null" || -z "$TOKEN" ]]; then
+            echo "Failed to obtain token. Response: $RESPONSE"
+            exit 1
+          fi
+          
+          echo "token=${TOKEN}" >> $GITHUB_OUTPUT
       
       - name: Return token to client
-        # In a real app, this would securely return the token to the client
-        # For a static site, you could:
-        # 1. Store token in GitHub Actions secrets temporarily 
-        # 2. Have the client check a commit status or some other "signal"
-        # 3. Use client-side JS to fetch the token from a temporary endpoint
-        run: echo "Token would be securely returned to the client"
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const callbackId = context.payload.client_payload?.callback_id || 
+                              context.payload.inputs?.callback_id || 
+                              new Date().getTime();
+            
+            // Create a gist with the token (this will be deleted after retrieval)
+            const token = '${{ steps.token_exchange.outputs.token }}';
+            const gistContent = JSON.stringify({ token, timestamp: new Date().toISOString() });
+            
+            // Create a gist with a unique name based on the callback ID
+            const gist = await github.rest.gists.create({
+              files: {
+                [`token-${callbackId}.json`]: {
+                  content: gistContent
+                }
+              },
+              description: 'Temporary authentication token (auto-deleted)',
+              public: false
+            });
+            
+            console.log(`Token gist created with ID: ${gist.data.id}`);
+            console.log(`Client should retrieve from: ${gist.data.html_url}`);
+            
+            // Schedule deletion of the gist after 5 minutes
+            setTimeout(async () => {
+              try {
+                await github.rest.gists.delete({ gist_id: gist.data.id });
+                console.log('Token gist deleted successfully');
+              } catch (error) {
+                console.error('Error deleting token gist:', error);
+              }
+            }, 5 * 60 * 1000);
 
   process_submission:
     if: github.event_name == 'issues' && contains(github.event.issue.title, '[Project Submission]')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       - name: Extract project data
         id: extract_data
@@ -80,7 +122,7 @@ jobs:
           fi
       
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v5
         with:
           commit-message: 'Add new project submission'
           title: 'New Project Submission'
@@ -92,7 +134,7 @@ jobs:
           branch: project-submission-${{ github.event.issue.number }}
       
       - name: Close Issue
-        uses: peter-evans/close-issue@v1
+        uses: peter-evans/close-issue@v3
         with:
           issue-number: ${{ github.event.issue.number }}
           comment: |
