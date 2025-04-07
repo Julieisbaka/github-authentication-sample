@@ -19,7 +19,7 @@ This application demonstrates a serverless approach to accepting project submiss
 - All data is stored in the repository
 - No additional backend needed
 
-## Setup Instructions
+## Development Instructions
 
 1. **Fork this repository**
 
@@ -59,12 +59,6 @@ When a user submits a project:
 5. A Pull Request is created with the changes
 6. A repository maintainer can review and merge the PR
 7. Once merged, the project appears on the site
-
-## Customization
-
-- Modify `index.html` to change the form fields or page layout
-- Update `styles.css` to customize the appearance
-- Adjust the GitHub Actions workflow in `.github/workflows/project-submission.yml`
 
 ## Security Considerations
 
