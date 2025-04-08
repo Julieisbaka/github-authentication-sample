@@ -216,11 +216,18 @@ function updateUI(isLoggedIn, user) {
         if (submissionForm) submissionForm.classList.remove('hidden');
         if (projectsList) projectsList.classList.remove('hidden');
         
+        // Show Tool Gallery for logged-in users
+        const toolGallery = document.getElementById('tool-gallery');
+        if (toolGallery) toolGallery.classList.remove('hidden');
+        
         usernameElement.textContent = user.name || user.login;
         avatarElement.src = user.avatar_url;
         
         // Load user's projects
         loadProjects();
+        
+        // Load existing tools
+        loadTools();
     } else {
         loggedInElement.classList.add('hidden');
         loggedOutElement.classList.remove('hidden');
@@ -228,6 +235,10 @@ function updateUI(isLoggedIn, user) {
         
         if (submissionForm) submissionForm.classList.add('hidden');
         if (projectsList) projectsList.classList.add('hidden');
+        
+        // Hide Tool Gallery for logged-out users
+        const toolGallery = document.getElementById('tool-gallery');
+        if (toolGallery) toolGallery.classList.add('hidden');
     }
 }
 
@@ -317,4 +328,94 @@ function displayProjects(projects) {
         
         container.appendChild(projectElement);
     });
+}
+
+/**
+ * Loads the user's submitted tools
+ */
+function loadTools() {
+    try {
+        // In a real app, this would fetch from a data file in the repo
+        // For demo, we'll use mock tools
+        const mockTools = [
+            {
+                name: "Sample Tool",
+                description: "This is an example tool submission",
+                status: "pending",
+                tags: ["javascript", "utility", "automation"],
+                user: "github_user",
+                timestamp: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+            }
+        ];
+        
+        displayTools(mockTools);
+    } catch (error) {
+        console.error('Error loading tools:', error);
+    }
+}
+
+/**
+ * Displays tools in the UI
+ */
+function displayTools(tools) {
+    const container = document.getElementById('tools-container');
+    if (!container) {
+        console.error('Tools container not found');
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    if (tools.length === 0) {
+        container.innerHTML = '<p>No tools submitted yet.</p>';
+        return;
+    }
+    
+    tools.forEach(tool => {
+        const toolElement = document.createElement('div');
+        toolElement.className = 'tool-card';
+        
+        const statusClass = tool.status === 'approved' ? 'approved' : 'pending';
+        const statusText = tool.status === 'approved' ? 'Approved' : 'Pending Review';
+        
+        const tagsHtml = tool.tags && tool.tags.length 
+            ? `<div class="project-tags">${tool.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>` 
+            : '';
+        
+        toolElement.innerHTML = `
+            <h3>${tool.name}</h3>
+            <span class="tool-status ${statusClass}">${statusText}</span>
+            <p>${tool.description}</p>
+            ${tagsHtml}
+            <span class="timestamp">Submitted ${formatDate(new Date(tool.timestamp))}</span>
+        `;
+        
+        container.appendChild(toolElement);
+    });
+}
+
+/**
+ * Formats a date for display
+ */
+function formatDate(date) {
+    // Check if date is within last 24 hours
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 24 * 60 * 60 * 1000) {
+        // Less than 24 hours ago
+        const hours = Math.floor(diff / (60 * 60 * 1000));
+        if (hours < 1) {
+            const minutes = Math.floor(diff / (60 * 1000));
+            return minutes <= 1 ? 'just now' : `${minutes} minutes ago`;
+        }
+        return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    } else if (diff < 30 * 24 * 60 * 60 * 1000) {
+        // Less than 30 days ago
+        const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+        return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    } else {
+        // More than 30 days ago
+        return date.toLocaleDateString();
+    }
 }

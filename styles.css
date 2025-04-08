@@ -283,6 +283,76 @@ button[type="submit"]:hover {
   line-height: 1.5;
 }
 
+/* Tool Gallery Styles */
+#tool-gallery {
+  margin-bottom: 3rem;
+}
+
+.tool-upload-container {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.file-input-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+#selected-folder-path {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-style: italic;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  background: var(--bg-color);
+  box-shadow: 0 1px 3px var(--shadow-color);
+  transition: var(--transition);
+  margin-bottom: 1.5rem;
+}
+
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  border-color: #d1d5da;
+}
+
+.tool-card h3 {
+  margin-bottom: 0.75rem;
+  color: var(--secondary-color);
+  font-size: 1.2rem;
+}
+
+.tool-card .tool-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.tool-status.pending {
+  background-color: #fff8c5;
+  color: #735c0f;
+}
+
+.tool-status.approved {
+  background-color: #e6ffed;
+  color: #22863a;
+}
+
+/* Project tags */
 .project-tags {
   display: flex;
   flex-wrap: wrap;
@@ -375,4 +445,42 @@ footer {
 .feature p {
   color: var(--text-muted);
   font-size: 0.95rem;
+}
+
+/* Progress Notification */
+.progress-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--bg-color);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1000;
+  min-width: 300px;
+}
+
+.progress-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.progress-message {
+  text-align: center;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

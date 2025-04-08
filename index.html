@@ -43,6 +43,39 @@
                 </div>
             </section>
 
+            <section id="tool-gallery" class="hidden">
+                <h2>Tool Gallery</h2>
+                <p>Upload your tools to the gallery. Your submissions will be added as a pull request to the GitHub repository.</p>
+                
+                <div class="tool-upload-container">
+                    <h3>Submit a New Tool</h3>
+                    <form id="tool-upload-form">
+                        <div class="form-group">
+                            <label for="tool-name">Tool Name</label>
+                            <input type="text" id="tool-name" name="tool-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-description">Description</label>
+                            <textarea id="tool-description" name="tool-description" rows="4" placeholder="Describe what your tool does..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-tags">Tags (comma-separated)</label>
+                            <input type="text" id="tool-tags" name="tool-tags" placeholder="javascript, utility, automation">
+                        </div>
+                        <div class="form-group">
+                            <label for="tool-folder">Select Tool Folder</label>
+                            <div class="file-input-container">
+                                <button type="button" id="select-folder-btn" class="button button-secondary">Select Folder</button>
+                                <span id="selected-folder-path">No folder selected</span>
+                            </div>
+                        </div>
+                        <button type="submit">Submit Tool</button>
+                    </form>
+                </div>
+                
+                <div id="tools-container"></div>
+            </section>
+
             <section id="submission-form" class="hidden">
                 <h2>Submit a New Project</h2>
                 <form id="project-form">
